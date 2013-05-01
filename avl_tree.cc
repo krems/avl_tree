@@ -53,13 +53,15 @@ class AVLTree {
   }
 
   template <size_t N>
-  AVLTree(T (&keys)[N]) : AVLTree(keys[0]) {
+  AVLTree(T (&keys)[N]) { // : AVLTree(keys[0]) { c++0x didn't work here so
+    root = new Node<T>(keys[0]);
     for (size_t i = 1; i < N; ++i) {
       this->add(keys[i]);
     }
   }
 
-  AVLTree(const vector<T>& keys) : AVLTree(keys[0]) {
+  AVLTree(const vector<T>& keys) { // : AVLTree(keys[0]) { see comment above
+    root = new Node<T>(keys[0]);
     for (auto it = keys.cbegin() + 1; it != keys.cend(); ++it) {
       this->add(*it);
     }
@@ -94,7 +96,7 @@ class AVLTree {
  private:
   Node<T>* add(T key, Node<T>* node) {
     if (!node) {
-      return node = new Node<T>(key, node);
+      return node = new Node<T>(key);
     }
     switch(node->compare(key)) {
       case 0:
@@ -209,5 +211,9 @@ class AVLTree {
 };
 
 int main() {
+  int a[] = {0, 115, 243, 8, 98, 34, 71};
+  AVLTree<int> tree(a);
+  tree.add(9);
+  //  tree.remove(115);
   return 0;
 }

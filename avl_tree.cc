@@ -44,16 +44,43 @@ class AVLTree {
     root = new Node<T>(key);
   }
 
+  template <size_t N>
+  AVLTree((const T&)[N] keys) : AVLTree(keys[0]) {
+    for (size_t i = 1; i < N; ++i) {
+      this->add(keys[i]);
+    }
+  }
+
+  AVLTree(const vector<T>& keys) : AVLTree(keys[0]) {
+    for (auto it = keys.cbegin() + 1; it != keys.cend(); ++it) {
+      this->add(*it);
+    }
+  }
+  
   Node<T>* add(T key) {
     return add(key, root);
   }
   
-  void remove(Node* node) {
-
+  Node<T>* remove(T key) {
+    return remove(key, root);
   }
   
   ~AVLTree() {
-    
+    stack<Node<T>*> nodes;
+    nodes.push(root);
+    while (!stack.empty()) {
+      Node<T>* node = nodes.top();
+      if (node->left) {
+        nodes.push(node->left);
+        continue;
+      }
+      if (node->right) {
+        nodes.push(node->right);
+        continue;
+      }
+      stack.pop();
+      delete node;
+    }
   }
   
  private:
@@ -70,7 +97,50 @@ class AVLTree {
       default:
         node->right = add(key, node->right);
     }
-    recalculateHeights(node);
+    return balance(node);
+  }
+
+  Node<T>* remove(T key, Node<T>* node) {
+    if (!node) {
+      throw std::exception;
+    }
+    switch(node->compare(key)) {
+      case 1:
+        node->right = remove(key, node->right);
+        break;
+      case -1:
+        node->left = remove(key, node->left);
+        break;
+      default:
+        Node<T>* lhs = node->left;
+        Node<T>* rhs = node->right;
+        delete node;
+        if (!lhs) {
+          return rhs;
+        }
+        if (!rhs) {
+          return lhs;
+        }
+        Node<T>* replacing = getMin(node->right);
+        replacing->left = lhs;
+        replacing->right = removeMin(rhs);
+        return balance(replacing);
+    }
+    return balance(node);
+  }
+
+  Node<T>* getMin(Node<T>* node) {
+    if (node->left) {
+      return getMin(node->left);
+    }
+    return node;
+  }
+
+  Node<T>* removeMin(Node<T>* node) {
+    if (!node->left) {
+      return node->right;
+    }
+    node->left = removeMin(node->left);
     return balance(node);
   }
   
@@ -93,6 +163,7 @@ class AVLTree {
   }
 
   Node<T>* balance(Node<T>* node) {
+    recalculateHeights(replacing);
     siwtch(node->balanceFactor()) {
       case 2:
         if ((node->right)->left->height > (node->right)->right->height) {

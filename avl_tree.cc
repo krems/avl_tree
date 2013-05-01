@@ -1,26 +1,35 @@
 template <typename T>
 struct Node {
-  Node(T data_, Node* parent_) {
-    parent = parent_;
+  Node<T>* left;
+  Node<T>* right;
+  size_t height;
+  T key;
+
+  Node(T key_) {
     left = 0;
     right = 0;
     height = 1;
-    data = data_;
+    key = key_;
   }
-  Node(T data_): Node(data_, 0) {}
-  Node* parent;
-  Node* left;
-  Node* right;
-  size_t height;
-  T data;
+  
   int balanceFactor() {
-    return right->height - left->height;
+    if (right) {
+      if (left) {
+        return right->height - left->height;
+      }
+      return right->height;
+    }
+    if (left) {
+      return left->height;
+    }
+    return 0;
   }
+
   int compare(T rhs) {
-    if (this->data < rhs) {
+    if (this->key < rhs) {
       return -1;
     }
-    if (this->data == rhs) {
+    if (this->key == rhs) {
       return 0;
     }
     return 1;
@@ -31,100 +40,82 @@ template <typename T>
 class AVLTree {
   Node<T>* root;
  public:
-  AVLTree(T data) {
-    root = new Node<T>(data, 0);
+  AVLTree(T key) {
+    root = new Node<T>(key);
   }
 
-  Node* add(T data) {
-    Node* node = root;
-    while (true) {
-      switch(node->compare(data)) {
-        case 0:
-          return node;
-        case -1:
-          if (node->left == 0) {
-            node->left = new Node<T>(data, node);
-            recalculateHeightsAndBalance(node);
-            return node->left;
-          } else {
-            node = node->left;
-          }
-          break;
-        default:
-          if (node->right == 0) {
-            node->right = new Node<T>(data, node);
-            recalculateHeightsAndBalance(node);
-            return node->right;
-          } else {
-            node = node->right;
-          }
-      }
-    }
+  Node<T>* add(T key) {
+    return add(key, root);
   }
-
+  
   void remove(Node* node) {
 
   }
   
   ~AVLTree() {
-    delete root;
+    
   }
   
- private: // todo: recalculate heights
-  Node* rotateRight(Node* parent) {
-    Node* up = parent->left;
+ private:
+  Node<T>* add(T key, Node<T>* node) {
+    if (!node) {
+      return node = new Node<T>(key, node);
+    }
+    switch(node->compare(key)) {
+      case 0:
+        return node;
+      case -1:
+        node->right = add(key, node->left);
+        break;
+      default:
+        node->right = add(key, node->right);
+    }
+    recalculateHeights(node);
+    return balance(node);
+  }
+  
+  Node<T>* rotateRight(Node<T>* parent) {
+    Node<T>* up = parent->left;
     parent->left = up->right;
     up->right = parent;
-    up->parent = parent->parent;
-    parent->parent = up;
     recalculateHeights(up->right);
     recalculateHeights(up);
     return up;
   }
   
-  Node* rotateLeft(Node* parent) {
-    Node* up = parent->right;
+  Node<T>* rotateLeft(Node<T>* parent) {
+    Node<T>* up = parent->right;
     parent->right = up->left;
     up->left = parent;
-    up->parent = parent->parent;
-    parent->parent = up;
     recalculateHeights(up->left);
     recalculateHeights(up);
     return up;
   }
 
-  Node* balance(Node* parent) {
-    siwtch(parent->balanceFactor()) {
+  Node<T>* balance(Node<T>* node) {
+    siwtch(node->balanceFactor()) {
       case 2:
-        if ((parent->right)->left->height > (parent->right)->right->height) {
-          parent->right = rotateRight(parent->right);
+        if ((node->right)->left->height > (node->right)->right->height) {
+          node->right = rotateRight(node->right);
         }
-        return rotateLeft(parent);
+        return rotateLeft(node);
       case -2:
-        if ((parent->right)->left->height < (parent->right)->right->height) {
-          parent->right = rotateLeft(parent->right);
+        if ((node->right)->left->height < (node->right)->right->height) {
+          node->right = rotateLeft(node->right);
         }
-        return rotateRight(parent);
+        return rotateRight(node);
       default:
-        return parent;
+        return node;
     }
   }
 
-  bool recalculateHeights(Node* node) {
+  bool recalculateHeights(Node<T>* node) {
     size_t old_geight = node->height;
     node->height = 1 + max(node->left, node->right);
     return !(old_geight == node->height);
   }
 
-  void recalculateHeightsAndBalance(Node* node) {
-    while(node) {
-      if (recalculateHeights(node)) {
-        return recalculateHeightsAndBalance(balance(node));
-      }
-    }
-  }
-  
-  size_t max(Node* lhs, Node* rhs) {
+  size_t max(Node<T>* lhs, Node<T>* rhs) {
     if (lhs != 0) {
       if (rhs != 0) {
         return lhs->height > rhs->height ? lhs->height : rhs->height;

@@ -88,10 +88,12 @@ class AVLTree {
       Node<T>* node = nodes.top();
       if (node->left) {
         nodes.push(node->left);
+        node->left = 0;
         continue;
       }
       if (node->right) {
         nodes.push(node->right);
+        node->right = 0;
         continue;
       }
       nodes.pop();
@@ -241,6 +243,5 @@ int main() {
   tree.find(9);
   tree.find(243);
   tree.remove(115);
-  std::cout << "loh" << std::endl;
   return 0;
 }

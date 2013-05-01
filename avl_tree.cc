@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include <stdlib.h>
 #include <vector>
 #include <exception>
@@ -28,19 +30,19 @@ struct Node {
       return right->height;
     }
     if (left) {
-      return left->height;
+      return -left->height;
     }
     return 0;
   }
 
   int compare(T rhs) {
     if (this->key < rhs) {
-      return -1;
+      return 1;
     }
     if (this->key == rhs) {
       return 0;
     }
-    return 1;
+    return -1;
   }
 };
 
@@ -68,11 +70,15 @@ class AVLTree {
   }
   
   Node<T>* add(T key) {
-    return add(key, root);
+    return root = add(key, root);
   }
   
   Node<T>* remove(T key) {
-    return remove(key, root);
+    return root = remove(key, root);
+  }
+
+  Node<T>* find(T key) {
+    return find(key, root);
   }
   
   ~AVLTree() {
@@ -96,15 +102,19 @@ class AVLTree {
  private:
   Node<T>* add(T key, Node<T>* node) {
     if (!node) {
-      return node = new Node<T>(key);
+      std::cout << key << " " << std::endl;
+      return new Node<T>(key);
     }
     switch(node->compare(key)) {
       case 0:
+        std::cout << key << " 0 " << node->key << std::endl;
         return node;
       case -1:
-        node->right = add(key, node->left);
+        std::cout << key << " -1 " << node->key << std::endl;
+        node->left = add(key, node->left);
         break;
-      default:
+      case 1:
+        std::cout << key << " 1 " << node->key << std::endl;
         node->right = add(key, node->right);
     }
     return balance(node);
@@ -121,24 +131,44 @@ class AVLTree {
       case -1:
         node->left = remove(key, node->left);
         break;
-      default:
+      case 0:
         Node<T>* lhs = node->left;
         Node<T>* rhs = node->right;
         delete node;
-        if (!lhs) {
-          return rhs;
-        }
         if (!rhs) {
           return lhs;
         }
-        Node<T>* replacing = getMin(node->right);
+        if (!lhs) {
+          return rhs;
+        }
+        Node<T>* replacing = getMin(rhs);
         replacing->left = lhs;
         replacing->right = removeMin(rhs);
         return balance(replacing);
     }
+    std::cout << "bal " << node->key << std::endl;
     return balance(node);
   }
 
+  Node<T>* find(T key, Node<T>* node) {
+    if (!node) {
+      std::cout << " NULL " << std::endl;
+      return 0;
+    }
+    std::cout << node->key << " " << key << std::endl;
+    switch(node->compare(key)) {
+      case 0:
+        std::cout << " match! " << std::endl;
+        return node;
+      case -1:
+        std::cout << " -1 " << std::endl;
+        return find(key, node->left);
+      case 1:
+        std::cout << " 1 " << std::endl;
+        return find(key, node->right);
+    }
+  }
+  
   Node<T>* getMin(Node<T>* node) {
     if (node->left) {
       return getMin(node->left);
@@ -158,7 +188,7 @@ class AVLTree {
     Node<T>* up = parent->left;
     parent->left = up->right;
     up->right = parent;
-    recalculateHeights(up->right);
+    recalculateHeights(parent);
     recalculateHeights(up);
     return up;
   }
@@ -167,33 +197,40 @@ class AVLTree {
     Node<T>* up = parent->right;
     parent->right = up->left;
     up->left = parent;
-    recalculateHeights(up->left);
+    recalculateHeights(parent);
     recalculateHeights(up);
     return up;
   }
 
   Node<T>* balance(Node<T>* node) {
+    std::cout << "!" << node->key << std::endl;
     recalculateHeights(node);
+    std::cout << "!!" << std::endl;
     switch(node->balanceFactor()) {
       case 2:
-        if ((node->right)->left->height > (node->right)->right->height) {
+        if (node->right->balanceFactor() < 0) {
+          std::cout << "2!!!" << std::endl;
           node->right = rotateRight(node->right);
         }
+        std::cout << "2!!!!" << std::endl;
         return rotateLeft(node);
       case -2:
-        if ((node->right)->left->height < (node->right)->right->height) {
-          node->right = rotateLeft(node->right);
+        if (node->left->balanceFactor() > 0) {
+          std::cout << "-2!!!" << std::endl;
+          node->left = rotateLeft(node->left);
         }
+        std::cout << "-2!!!!" << std::endl;
         return rotateRight(node);
       default:
+        std::cout << "!!!" << std::endl;
         return node;
     }
   }
 
   bool recalculateHeights(Node<T>* node) {
-    size_t old_geight = node->height;
+    size_t old_height = node->height;
     node->height = 1 + max(node->left, node->right);
-    return !(old_geight == node->height);
+    return !(old_height == node->height);
   }
 
   size_t max(Node<T>* lhs, Node<T>* rhs) {
@@ -212,8 +249,14 @@ class AVLTree {
 
 int main() {
   int a[] = {0, 115, 243, 8, 98, 34, 71};
-  AVLTree<int> tree(a);
+  AVLTree<int> tree(a[0]);
+  for (size_t i = 1; i < 7; ++i) {
+    std::cout << "a[" << i << "] = " << a[i] << std::endl;
+    std::cout << "root: " << tree.add(a[i])->key << std::endl;;
+  }
   tree.add(9);
-  //  tree.remove(115);
+  tree.find(9);
+  tree.find(243);
+  tree.remove(115);
   return 0;
 }

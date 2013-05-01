@@ -39,10 +39,10 @@ struct Node {
     if (this->key < rhs) {
       return 1;
     }
-    if (this->key == rhs) {
-      return 0;
+    if (rhs < this->key) {
+      return -1;
     }
-    return -1;
+    return 0;
   }
 };
 

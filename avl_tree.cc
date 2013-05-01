@@ -102,19 +102,15 @@ class AVLTree {
  private:
   Node<T>* add(T key, Node<T>* node) {
     if (!node) {
-      std::cout << key << " " << std::endl;
       return new Node<T>(key);
     }
     switch(node->compare(key)) {
       case 0:
-        std::cout << key << " 0 " << node->key << std::endl;
         return node;
       case -1:
-        std::cout << key << " -1 " << node->key << std::endl;
         node->left = add(key, node->left);
         break;
       case 1:
-        std::cout << key << " 1 " << node->key << std::endl;
         node->right = add(key, node->right);
     }
     return balance(node);
@@ -146,25 +142,19 @@ class AVLTree {
         replacing->right = removeMin(rhs);
         return balance(replacing);
     }
-    std::cout << "bal " << node->key << std::endl;
     return balance(node);
   }
 
   Node<T>* find(T key, Node<T>* node) {
     if (!node) {
-      std::cout << " NULL " << std::endl;
       return 0;
     }
-    std::cout << node->key << " " << key << std::endl;
     switch(node->compare(key)) {
       case 0:
-        std::cout << " match! " << std::endl;
         return node;
       case -1:
-        std::cout << " -1 " << std::endl;
         return find(key, node->left);
       case 1:
-        std::cout << " 1 " << std::endl;
         return find(key, node->right);
     }
   }
@@ -203,26 +193,19 @@ class AVLTree {
   }
 
   Node<T>* balance(Node<T>* node) {
-    std::cout << "!" << node->key << std::endl;
     recalculateHeights(node);
-    std::cout << "!!" << std::endl;
     switch(node->balanceFactor()) {
       case 2:
         if (node->right->balanceFactor() < 0) {
-          std::cout << "2!!!" << std::endl;
           node->right = rotateRight(node->right);
         }
-        std::cout << "2!!!!" << std::endl;
         return rotateLeft(node);
       case -2:
         if (node->left->balanceFactor() > 0) {
-          std::cout << "-2!!!" << std::endl;
           node->left = rotateLeft(node->left);
         }
-        std::cout << "-2!!!!" << std::endl;
         return rotateRight(node);
       default:
-        std::cout << "!!!" << std::endl;
         return node;
     }
   }
@@ -258,5 +241,6 @@ int main() {
   tree.find(9);
   tree.find(243);
   tree.remove(115);
+  std::cout << "loh" << std::endl;
   return 0;
 }

@@ -1,3 +1,11 @@
+#include <stdlib.h>
+#include <vector>
+#include <exception>
+#include <stack>
+
+using std::vector;
+using std::stack;
+
 template <typename T>
 struct Node {
   Node<T>* left;
@@ -45,7 +53,7 @@ class AVLTree {
   }
 
   template <size_t N>
-  AVLTree((const T&)[N] keys) : AVLTree(keys[0]) {
+  AVLTree(T (&keys)[N]) : AVLTree(keys[0]) {
     for (size_t i = 1; i < N; ++i) {
       this->add(keys[i]);
     }
@@ -68,7 +76,7 @@ class AVLTree {
   ~AVLTree() {
     stack<Node<T>*> nodes;
     nodes.push(root);
-    while (!stack.empty()) {
+    while (!nodes.empty()) {
       Node<T>* node = nodes.top();
       if (node->left) {
         nodes.push(node->left);
@@ -78,7 +86,7 @@ class AVLTree {
         nodes.push(node->right);
         continue;
       }
-      stack.pop();
+      nodes.pop();
       delete node;
     }
   }
@@ -102,7 +110,7 @@ class AVLTree {
 
   Node<T>* remove(T key, Node<T>* node) {
     if (!node) {
-      throw std::exception;
+      throw std::exception();
     }
     switch(node->compare(key)) {
       case 1:
@@ -163,8 +171,8 @@ class AVLTree {
   }
 
   Node<T>* balance(Node<T>* node) {
-    recalculateHeights(replacing);
-    siwtch(node->balanceFactor()) {
+    recalculateHeights(node);
+    switch(node->balanceFactor()) {
       case 2:
         if ((node->right)->left->height > (node->right)->right->height) {
           node->right = rotateRight(node->right);

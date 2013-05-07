@@ -234,11 +234,13 @@ class AVLTree {
 
 int main() {
   int a[] = {0, 115, 243, 8, 98, 34, 71};
-  AVLTree<int> tree(a[0]);
-  for (size_t i = 1; i < 7; ++i) {
-    std::cout << "a[" << i << "] = " << a[i] << std::endl;
-    std::cout << "root: " << tree.add(a[i])->key << std::endl;;
-  }
+  // AVLTree<int> tree(a[0]);
+  // for (size_t i = 1; i < 7; ++i) {
+  //   std::cout << "a[" << i << "] = " << a[i] << std::endl;
+  //   std::cout << "root: " << tree.add(a[i])->key << std::endl;;
+  // }
+  vector<int> b {0, 115, 243, 8, 98, 34, 71};
+  AVLTree<int> tree(b);
   tree.add(9);
   tree.find(9);
   tree.find(243);
